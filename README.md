@@ -1,0 +1,2 @@
+# kiri
+.NET IRC bot
