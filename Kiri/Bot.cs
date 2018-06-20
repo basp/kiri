@@ -5,8 +5,6 @@
     using System.Net.Sockets;
     using System.Threading.Tasks;
 
-    
-
     public class Bot
     {
         private readonly string nick;
@@ -36,6 +34,7 @@
             while (true)
             {
                 var line = reader.ReadLine();
+                Console.SetCursorPosition(0, Console.WindowHeight - 1);
                 Console.WriteLine($"> {line}");
             }
         }
