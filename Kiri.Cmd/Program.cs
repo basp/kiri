@@ -7,20 +7,27 @@
     using System.Net.Sockets;
     using System.Threading;
 
-  
     class Program
     {
-        private static readonly LineBuffer buffer = new LineBuffer(5);
+        const string nick = "Methbot";
+        
+        const string url = "https://github.com/basp//methbot";
+
+        private static readonly LineBuffer buffer = new LineBuffer(100);
+
+        private static readonly object bufferLock = new object();
+
+        private static readonly object writerLock = new object();
 
         static void Update()
         {
-            var lines = buffer.Last(10).ToList();
+            var lines = buffer.Last(10).ToArray();
             var offset = Console.WindowHeight - 2;
 
             Console.Clear();
-            for(var i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
-                if(i >= lines.Count) break;
+                if (i >= lines.Length) break;
                 Console.SetCursorPosition(0, offset - i);
                 Console.WriteLine(lines[i]);
             }
@@ -29,20 +36,53 @@
             Console.Write("# ");
         }
 
-        static void StartReading(TcpClient client)
+        static void Add(string line)
         {
-            var stream = client.GetStream();
-            var reader = new StreamReader(stream);
+            lock (bufferLock)
+            {
+                buffer.Add(line);
+                Update();
+            }
+        }
+
+        static void Pong(StreamWriter writer, string ident)
+        {
+            Send(writer, $"PONG :{ident}");
+        }
+
+        static string ParsePing(string ping)
+        {
+            var chunks = ping.Split(':').Select(x => x.Trim());
+            return chunks.Skip(1).First();
+        }
+
+        static void StartReading(StreamWriter writer, StreamReader reader)
+        {
             while (true)
             {
                 var line = reader.ReadLine();
-                if(string.IsNullOrWhiteSpace(line))
+                if (string.IsNullOrWhiteSpace(line))
                 {
                     break;
                 }
 
-                buffer.Add($"< {line}");
-                Update();
+                Add($"< {line}");
+
+                if (line.StartsWith("PING"))
+                {
+                    var ident = ParsePing(line);
+                    Pong(writer, ident);
+                }
+            }
+        }
+
+        static void Send(StreamWriter writer, string data)
+        {
+            Add($"> {data}");
+            lock (writerLock)
+            {
+                writer.WriteLine(data);
+                writer.Flush();
             }
         }
 
@@ -50,19 +90,22 @@
         {
             const string hostname = "irc.freenode.net";
             const int port = 6667;
-            // const string nick = "Methbot";
-            // const string url = "https://github.com/basp//methbot";
 
             using (var client = new TcpClient(hostname, port))
+            using (var stream = client.GetStream())
+            using (var writer = new StreamWriter(stream))
+            using (var reader = new StreamReader(stream))
             {
-                var t = new Thread(() => StartReading(client));
+                var t = new Thread(() => StartReading(writer, reader));
                 t.Start();
+
+                Send(writer, $"NICK {nick}");
+                Send(writer, $"USER {nick} 8 * :{url}");
 
                 while (true)
                 {
                     var cmd = Console.ReadLine();
-                    buffer.Add($"> {cmd}");
-                    Update();
+                    Send(writer, cmd);
                 }
             }
         }
