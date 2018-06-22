@@ -18,7 +18,6 @@ namespace Kiri
                 .WithRegistration(Nick, Url)
                 .WithPong()
                 .WithLogging(ctx => Console.WriteLine(ctx.Message))
-                .Use(new RandomFactsMiddleware(facts))
                 .Connect("chat.freenode.net", 6667);
 
             Thread.Sleep(30 * 1000);

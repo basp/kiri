@@ -2,9 +2,9 @@ namespace Kiri
 {
     public class Message
     {
-        private string from;
-        private string command;        
-        private string args;
+        // private string from;
+        // private string command;        
+        // private string args;
 
         public static bool TryParse(string s, out Message message)
         {
