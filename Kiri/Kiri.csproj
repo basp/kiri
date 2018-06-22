@@ -4,4 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Optional" Version="4.0.0" />
+    <PackageReference Include="Sprache" Version="2.1.2" />
+  </ItemGroup>
+
 </Project>

@@ -18,5 +18,8 @@ namespace Kiri
 
         public static Client WithLogging(this Client client, Action<IContext> log) =>
             client.Use(new LoggingMiddleware(log));
+
+        public static Client WithGreeting(this Client client) =>
+            client.Use(new GreetingMiddleware());
     }
 }

@@ -16,11 +16,15 @@ namespace Kiri
 
         private readonly object syncRoot = new object();
 
+        private readonly ISet<string> channels = new HashSet<string>();
+
         private TcpClient tcpClient;
 
         private NetworkStream stream;
 
         private StreamWriter writer;
+
+        private string currentChannel;
 
         public Client Use(IMiddleware middleware)
         {
@@ -57,14 +61,41 @@ namespace Kiri
             this.writer.Flush();
         }
 
-        public void Join(string channel) =>
+        public void Join(string channel)
+        {
+            this.currentChannel = channel;
+
+            if (this.channels.Contains(channel))
+            {
+                return;
+            }
+
             this.Send($"JOIN {channel}");
+            this.channels.Add(channel);
+        }
 
-        public void Part(string channel) =>
+
+        public void Part(string channel)
+        {
+            this.currentChannel = null;
+
+            if (!this.channels.Contains(channel))
+            {
+                return;
+            }
+
             this.Send($"PART {channel}");
+            this.channels.Remove(channel);
+        }
 
-        public void Say(string to, string message) => 
+        public void Say(string message) =>
+            this.Say(this.currentChannel, message);
+
+        public void Say(string to, string message) =>
             this.Send($"PRIVMSG {to} :{message}");
+
+        public void Emote(string action) =>
+            this.Emote(this.currentChannel, action);
 
         public void Emote(string to, string action) =>
             this.Send($"PRIVMSG {to} :\u0001ACTION {action}\u0001");
@@ -121,7 +152,7 @@ namespace Kiri
                             return;
                         }
 
-                        this.ExecutePipeline(new ContextAdapter(line, this));
+                        this.ExecutePipeline(new ContextAdapter(this.currentChannel, line, this));
                         this.OnNext(line);
                     }
                     catch (Exception ex)
@@ -176,18 +207,29 @@ namespace Kiri
 
         private class ContextAdapter : IContext
         {
+            private readonly string from;
+
             private readonly string message;
+
+            private readonly Client client;
 
             private readonly ISender sender;
 
-            public ContextAdapter(string message, ISender sender)
+            public ContextAdapter(string from, string message, Client client)
             {
+                this.from = from;
                 this.message = message;
-                this.sender = sender;
+                this.sender = client;
+                this.client = client;
             }
+
+            public string From => this.from;
 
             public string Message => this.message;
 
+            public Client Client => this.client;
+
+            [Obsolete]
             public void Send(string data)
             {
                 this.sender.Send(data);
