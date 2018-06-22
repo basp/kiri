@@ -46,6 +46,17 @@ namespace Kiri
             return this;
         }
 
+        public void Send(string data)
+        {
+            if (this.stream == null)
+            {
+                return;
+            }
+
+            this.writer.WriteLine(data);
+            this.writer.Flush();
+        }
+
         public IDisposable Subscribe(IObserver<string> observer)
         {
             lock (syncRoot)
@@ -81,17 +92,6 @@ namespace Kiri
             {
                 Parallel.ForEach(this.observers, x => x.OnCompleted());
             }
-        }
-
-        public void Send(string data)
-        {
-            if (this.stream == null)
-            {
-                return;
-            }
-
-            this.writer.WriteLine(data);
-            this.writer.Flush();
         }
 
         private void StartReading()
