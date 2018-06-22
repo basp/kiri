@@ -57,6 +57,18 @@ namespace Kiri
             this.writer.Flush();
         }
 
+        public void Join(string channel) =>
+            this.Send($"JOIN {channel}");
+
+        public void Part(string channel) =>
+            this.Send($"PART {channel}");
+
+        public void Say(string to, string message) => 
+            this.Send($"PRIVMSG {to} :{message}");
+
+        public void Emote(string to, string action) =>
+            this.Send($"PRIVMSG {to} :\u0001ACTION {action}\u0001");
+
         public IDisposable Subscribe(IObserver<string> observer)
         {
             lock (syncRoot)
