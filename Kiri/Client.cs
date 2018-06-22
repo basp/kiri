@@ -22,11 +22,17 @@ namespace Kiri
 
         private StreamWriter writer;
 
-        public void Use(IMiddleware middleware) =>
+        public Client Use(IMiddleware middleware)
+        {
             this.pipeline.Add(middleware);
+            return this;
+        }
 
-        public void Use(Action<IContext, Action> middleware) =>
+        public Client Use(Action<IContext, Action> middleware)
+        {
             this.pipeline.Add(new MiddlewareAdapter(middleware));
+            return this;
+        }
 
         public Client Connect(string hostname, int port)
         {

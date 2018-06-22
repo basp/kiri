@@ -10,32 +10,13 @@ namespace Kiri
         public static Client WithRegistration(this Client client, string nick) =>
             client.WithRegistration(nick, DefaultInfo);
 
-        public static Client WithRegistration(this Client client, string nick, string info)
-        {
-            var registered = false;
-            client.Use((ctx, next) =>
-            {
-            });
+        public static Client WithRegistration(this Client client, string nick, string info) =>
+            client.Use(new RegistrationMiddleware(nick, info));
 
-            return client;
-        }
+        public static Client WithPong(this Client client) =>
+            client.Use(new PongMiddleware());
 
-        public static Client WithPong(this Client client)
-        {
-            client.Use((ctx, next) =>
-            {
-            });
-
-            return client;
-        }
-
-        public static Client WithLogging(this Client client, Action<IContext> log)
-        {
-            client.Use((ctx, next) =>
-            {
-            });
-
-            return client;
-        }
+        public static Client WithLogging(this Client client, Action<IContext> log) =>
+            client.Use(new LoggingMiddleware(log));
     }
 }
