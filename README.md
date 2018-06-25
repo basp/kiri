@@ -80,4 +80,6 @@ class Session : IIdentityProvider
 }
 ```
 
-So now that our `Session` class implements `IIdentityProvider` things should compile just fine and also the middleware should kick in as well. Now your client will be able to stay alive.
+So now that our `Session` class implements `IIdentityProvider` things should compile just fine and also the middleware should kick in as well. Now your client will be able to stay alive and you'll be able to send IRC commands using the `Console.ReadLine` call.
+
+For example you can `JOIN <channel_name>` or `PRIVMSG <channel_name> :<msg>` but of course the bot supports these operations as well. The interactive mode is useful for *out of band* commands though.
