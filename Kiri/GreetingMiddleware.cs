@@ -10,7 +10,6 @@ namespace Kiri
         {
             if(!greeted)
             {
-                
             }
 
             next();

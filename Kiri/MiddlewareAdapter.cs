@@ -2,7 +2,7 @@ namespace Kiri
 {
     using System;
 
-    public class MiddlewareAdapter : IMiddleware
+    internal class MiddlewareAdapter : IMiddleware
     {
         private Action<IContext, Action> action;
 
