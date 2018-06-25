@@ -3,9 +3,11 @@ namespace Kiri.Cmd
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using Kiri;
-
+    using Newtonsoft.Json;
+   
     class Program
     {
         public static void Main(string[] args)
@@ -22,8 +24,10 @@ namespace Kiri.Cmd
             var client = Client
                 .Create(session)
                 .WithRegistration()
+                .WithGreeting()
                 .WithPong()
                 .WithLogging(ctx => Console.WriteLine(ctx.Message))
+                .Use(new MarkovMiddleware<Session>())
                 .Connect(Host, Port);
 
             Thread.Sleep(30 * 1000);

@@ -5,6 +5,15 @@ namespace Kiri
 
     public static class ReplyGrammar
     {
+        public static Parser<Message> PrivateMessage =
+            from _1 in Parse.Char(':').Token()
+            from @from in Parse.AnyChar.Except(Parse.WhiteSpace).AtLeastOnce().Token().Text()
+            from _2 in Parse.String("PRIVMSG").Token()
+            from channel in Parse.AnyChar.Except(Parse.WhiteSpace).AtLeastOnce().Token().Text()
+            from _3 in Parse.Char(':')
+            from message in Parse.AnyChar.Many().Token().Text()
+            select new Message(@from, channel, message);
+
         private static Parser<string> Prefix =
             from _ in Parse.Char(':')
             from prefix in Parse.Until(Parse.AnyChar, Parse.WhiteSpace).Token().Text()
