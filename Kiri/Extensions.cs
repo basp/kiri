@@ -17,6 +17,6 @@ namespace Kiri
             where T : class => client.Use(new LoggingMiddleware<T>(log));
 
         public static Client<T> WithGreeting<T>(this Client<T> client)
-            where T : class => client.Use(new GreetingMiddleware<T>());
+            where T : class, IRegistrationProvider => client.Use(new GreetingMiddleware<T>());
     }
 }

@@ -3,7 +3,7 @@ namespace Kiri
     using System;
     using System.Linq;
 
-    public class GreetingMiddleware<T> : IMiddleware<T> where T: class
+    public class GreetingMiddleware<T> : IMiddleware<T> where T : class, IRegistrationProvider
     {
         private bool greeted = false;
 
@@ -13,7 +13,8 @@ namespace Kiri
             {
                 if (NumericReply.TryParse<NamesReply>(context.Message, out var reply))
                 {
-                    var names = reply.Names.Except(new[] { "Methbot" }).ToList();
+                    var nick = context.Session.Nick;
+                    var names = reply.Names.Except(new[] { nick }).ToList();
 
                     if (names.Count > 1)
                     {
