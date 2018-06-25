@@ -2,7 +2,7 @@ namespace Kiri
 {
     using System;
 
-    public class RegistrationMiddleware<T> : IMiddleware<T> where T: class, IRegistrationProvider
+    public class IdentityMiddleware<T> : IMiddleware<T> where T: class, IIdentityProvider
     {
         private bool registered;
 

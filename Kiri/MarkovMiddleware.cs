@@ -2,22 +2,52 @@ namespace Kiri
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using Newtonsoft.Json;
 
-    public class MarkovMiddleware<T> : IMiddleware<T> where T : class, IMarkovMemoryProvider
+    public class MarkovMiddleware<T> : IMiddleware<T>
+        where T : class, IMarkovMemoryProvider, IIdentityProvider
     {
-        static readonly Random rng = new Random();
+        private static readonly Random rng = new Random();
 
-        public void Seed(string input)
+        public void Seed(T session, string path)
         {
+            var lines = File.ReadAllLines(path);
+            Seed(session, lines);
+        }
 
+        public void Seed(T session, string[] lines)
+        {
+            foreach (var line in lines)
+            {
+                Update(session, line);
+            }
+        }
+
+        private bool ContainsOwnRef(IContext<T> context, string text)
+        {
+            foreach (var alias in context.Session.Aliases)
+            {
+                if (text.ToLowerInvariant().Contains(alias.ToLowerInvariant()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Execute(IContext<T> context, Action next)
         {
             if (PrivateMessage.TryParse(context.Message, out var message))
             {
+                if (ContainsOwnRef(context, message.Text))
+                {
+                    var resp = string.Join(" ", Words(context.Session).ToArray());
+                    context.Client.Say(resp);
+                }
+
                 Update(context.Session, message.Text);
             }
 
@@ -52,8 +82,14 @@ namespace Kiri
         {
             var mem = session.Memory;
 
-            var words = input.Split(new[] { ' ' }).Select(x => x.Trim()).ToList();
-            var bigrams = words.Zip(words.Skip(1), (x, y) => Tuple.Create(x, y)).ToList();
+            var words = input
+                .Split(new[] { ' ' })
+                .Select(x => x.Trim())
+                .ToList();
+
+            var bigrams = words
+                .Zip(words.Skip(1), (x, y) => Tuple.Create(x, y))
+                .ToList();
 
             for (var i = 0; i < bigrams.Count - 1; i++)
             {
@@ -67,6 +103,9 @@ namespace Kiri
 
                 mem[tc].Add(tn.Item2);
             }
+
+            // var json = JsonConvert.SerializeObject(mem);
+            // Console.WriteLine(json);
         }
     }
 }

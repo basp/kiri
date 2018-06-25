@@ -3,7 +3,7 @@ namespace Kiri
     using System;
     using System.Linq;
 
-    public class GreetingMiddleware<T> : IMiddleware<T> where T : class, IRegistrationProvider
+    public class GreetingMiddleware<T> : IMiddleware<T> where T : class, IIdentityProvider
     {
         private bool greeted = false;
 

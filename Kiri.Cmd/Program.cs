@@ -7,30 +7,37 @@ namespace Kiri.Cmd
     using System.Threading;
     using Kiri;
     using Newtonsoft.Json;
-   
+    using Serilog;
+
     class Program
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.LiterateConsole()
+                .CreateLogger();
+            
+            const string Facts = @"D:\basp\kiri\Kiri.Cmd\facts.txt";
             const string Nick = "Methbot";
             const string Url = "https://github.com/basp/methbot";
             const string Host = "chat.freenode.net";
             const int Port = 6667;
 
-            var facts = File.ReadAllLines(@"D:\basp\kiri\Kiri.Cmd\facts.txt");
+            var session = new Session(Nick, Url, Nick, "Meth");
 
-            var session = new Session(Nick, Url);
-
+            var markov = new MarkovMiddleware<Session>();
+            markov.Seed(session, Facts);
             var client = Client
                 .Create(session)
-                .WithRegistration()
+                .WithIdentity()
                 .WithGreeting()
                 .WithPong()
-                .WithLogging(ctx => Console.WriteLine(ctx.Message))
-                .Use(new MarkovMiddleware<Session>())
+                .WithLogging()
+                .Use(FactMiddleware.Create<Session>(Facts))
+                .Use(markov)
                 .Connect(Host, Port);
 
-            Thread.Sleep(30 * 1000);
+            Thread.Sleep(20 * 1000);
             client.Join("##vanityguild");
 
             while (true)
