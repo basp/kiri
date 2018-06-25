@@ -78,7 +78,7 @@ namespace Kiri
         {
             reply = default(T);
 
-            var maybeNumericReply = ReplyGrammar.NumericReply.TryParse(s);
+            var maybeNumericReply = Grammar.NumericReply.TryParse(s);
             if (maybeNumericReply.WasSuccessful)
             {
                 if (maybeNumericReply.Value.TryParse(out reply))
@@ -112,7 +112,7 @@ namespace Kiri
         {
             reply = null;
 
-            var res = ReplyGrammar.NamesReply.TryParse(s);
+            var res = Grammar.NamesReply.TryParse(s);
             if (res.WasSuccessful)
             {
                 reply = res.Value;
@@ -138,7 +138,7 @@ namespace Kiri
         {
             reply = null;
 
-            var res = ReplyGrammar.EndOfNames.TryParse(s);
+            var res = Grammar.EndOfNames.TryParse(s);
             if (res.WasSuccessful)
             {
                 reply = res.Value;
@@ -164,7 +164,7 @@ namespace Kiri
         {
             reply = null;
 
-            var res = ReplyGrammar.MotdStart.TryParse(s);
+            var res = Grammar.MotdStart.TryParse(s);
             if (res.WasSuccessful)
             {
                 reply = res.Value;
@@ -190,7 +190,7 @@ namespace Kiri
         {
             reply = null;
 
-            var res = ReplyGrammar.Motd.TryParse(s);
+            var res = Grammar.Motd.TryParse(s);
             if (res.WasSuccessful)
             {
                 reply = res.Value;
@@ -207,7 +207,7 @@ namespace Kiri
         {
             reply = null;
 
-            var res = ReplyGrammar.EndOfMotd.TryParse(s);
+            var res = Grammar.EndOfMotd.TryParse(s);
             if (res.WasSuccessful)
             {
                 reply = res.Value;

@@ -4,7 +4,7 @@ namespace Kiri
     using System.Collections.Generic;
     using System.Linq;
 
-    class MarkovMiddleware<T> : IMiddleware<T> where T : class, IMarkovMemoryProvider
+    public class MarkovMiddleware<T> : IMiddleware<T> where T : class, IMarkovMemoryProvider
     {
         public void Execute(IContext<T> context, Action next)
         {

@@ -3,7 +3,7 @@ namespace Kiri
     using System.Linq;
     using Sprache;
 
-    public static class ReplyGrammar
+    public static class Grammar
     {
         public static Parser<Message> PrivateMessage =
             from _1 in Parse.Char(':').Token()

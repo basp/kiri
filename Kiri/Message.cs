@@ -27,7 +27,7 @@ namespace Kiri
         {
             message = null;
 
-            var res = ReplyGrammar.PrivateMessage.TryParse(s);
+            var res = Grammar.PrivateMessage.TryParse(s);
             if (res.WasSuccessful)
             {
                 message = res.Value;
