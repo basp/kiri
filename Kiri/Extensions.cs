@@ -5,8 +5,6 @@ namespace Kiri
 
     public static class Extensions
     {
-        const string DefaultInfo = "https://github.com/basp/kiri";
-
         public static Client<T> WithIdentity<T>(this Client<T> client)
             where T : class, IIdentityProvider => client.Use(new IdentityMiddleware<T>());
 

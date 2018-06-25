@@ -5,7 +5,25 @@ namespace Kiri
 
     public class GreetingMiddleware<T> : IMiddleware<T> where T : class, IIdentityProvider
     {
+        private static readonly Random rng = new Random();
+
         private bool greeted = false;
+
+        private static string[] greetings = new[]
+        {
+            "hallo",
+            "hoi",
+            "hello",
+            "hi",
+            "hei",
+            "allo",
+            "hola",
+            "konnichiwa",
+            "aloha",
+        };
+
+        private static string RandomGreeting() =>
+            greetings[rng.Next(greetings.Length)];
 
         public void Execute(IContext<T> context, Action next)
         {
@@ -15,14 +33,15 @@ namespace Kiri
                 {
                     var nick = context.Session.Nick;
                     var names = reply.Names.Except(context.Session.Aliases).ToList();
+                    var grt = RandomGreeting();
 
                     if (names.Count > 1)
                     {
-                        context.Client.Say($"Hi guys!");
+                        context.Client.Say($"{grt} guys!");
                     }
                     else if (names.Count > 0)
                     {
-                        context.Client.Say($"Hi {names[0]}!");
+                        context.Client.Say($"{grt} {names[0]}!");
                     }
                 }
             }

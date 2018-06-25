@@ -16,7 +16,7 @@ namespace Kiri.Cmd
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.LiterateConsole()
                 .CreateLogger();
-            
+
             const string Facts = @"D:\basp\kiri\Kiri.Cmd\facts.txt";
             const string Nick = "Methbot";
             const string Url = "https://github.com/basp/methbot";
@@ -24,9 +24,9 @@ namespace Kiri.Cmd
             const int Port = 6667;
 
             var session = new Session(Nick, Url, Nick, "Meth");
-
             var markov = new MarkovMiddleware<Session>();
-            markov.Seed(session, Facts);
+            markov.Seed(session, @"D:\tmp\chat-sanitized.log");
+
             var client = Client
                 .Create(session)
                 .WithIdentity()

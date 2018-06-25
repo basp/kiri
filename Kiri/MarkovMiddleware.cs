@@ -4,11 +4,61 @@ namespace Kiri
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Newtonsoft.Json;
+    using Serilog;
 
     public class MarkovMiddleware<T> : IMiddleware<T>
         where T : class, IMarkovMemoryProvider, IIdentityProvider
     {
+        class SaveCommand : ICommand<T>
+        {
+            public static bool TryParse(string s, out ICommand<T> command)
+            {
+                command = null;
+
+                if (s.StartsWith("!markov-save"))
+                {
+                    command = new SaveCommand();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Execute(IContext<T> context)
+            {
+                var json = JsonConvert.SerializeObject(context);
+                var path = @"D:\tmp\mem.json";
+                File.WriteAllText(path, json);
+                Log.Logger.Information("Wrote memory to {path}", path);
+            }
+        }
+
+        class InfoCommand : ICommand<T>
+        {
+            public static bool TryParse(string s, out ICommand<T> command)
+            {
+                command = null;
+
+                if (s.StartsWith("!markov-info"))
+                {
+                    command = new InfoCommand();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Execute(IContext<T> context)
+            {
+                var json = JsonConvert.SerializeObject(context);
+                Console.WriteLine(json);
+            }
+        }
+
         private static readonly Random rng = new Random();
+
+        private DateTime lastResponse = DateTime.Now;
 
         public void Seed(T session, string path)
         {
@@ -41,17 +91,44 @@ namespace Kiri
         {
             if (PrivateMessage.TryParse(context.Message, out var message))
             {
-                if (ContainsOwnRef(context, message.Text))
+                ICommand<T> cmd;
+
+                if (SaveCommand.TryParse(message.Text, out cmd))
                 {
-                    var resp = string.Join(" ", Words(context.Session).ToArray());
+                    cmd.Execute(context);
+                }
+                else if (InfoCommand.TryParse(message.Text, out cmd))
+                {
+                    cmd.Execute(context);
+                }
+                else if (ContainsOwnRef(context, message.Text))
+                {
+                    Log.Debug("Eager to respond (contains own ref)");
+                    var resp = RandomResponse(context);
                     context.Client.Say(resp);
+                    this.lastResponse = DateTime.Now;
+                }
+                else
+                {
+                    var t = DateTime.Now.Subtract(this.lastResponse);
+                    if (t.TotalSeconds < 10)
+                    {
+                        Log.Debug("Eager to respond (believes to be in convo)");
+                        var resp = RandomResponse(context);
+                        context.Client.Say(resp);
+                        this.lastResponse = DateTime.Now;
+                    }
                 }
 
+                Log.Debug("[NOTRIG] Updating memory");
                 Update(context.Session, message.Text);
             }
 
             next();
         }
+
+        private string RandomResponse(IContext<T> context) =>
+            string.Join(" ", Words(context.Session).ToArray());
 
         private static IEnumerable<string> Words(T session)
         {
