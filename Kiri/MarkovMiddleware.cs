@@ -4,7 +4,6 @@ namespace Kiri
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using Newtonsoft.Json;
 
     public class MarkovMiddleware<T> : IMiddleware<T>
         where T : class, IMarkovMemoryProvider, IIdentityProvider
@@ -103,9 +102,6 @@ namespace Kiri
 
                 mem[tc].Add(tn.Item2);
             }
-
-            // var json = JsonConvert.SerializeObject(mem);
-            // Console.WriteLine(json);
         }
     }
 }

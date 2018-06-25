@@ -14,7 +14,7 @@ namespace Kiri
                 if (NumericReply.TryParse<NamesReply>(context.Message, out var reply))
                 {
                     var nick = context.Session.Nick;
-                    var names = reply.Names.Except(new[] { nick }).ToList();
+                    var names = reply.Names.Except(context.Session.Aliases).ToList();
 
                     if (names.Count > 1)
                     {

@@ -11,7 +11,6 @@ namespace Kiri
         {
             if (PingMessage.TryParse(context.Message, out var message))
             {
-                Log.Logger.Information(context.Message);
                 context.Send($"PONG :{message.Ping}");
             }
 
