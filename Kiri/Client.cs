@@ -10,6 +10,8 @@ namespace Kiri
 
     public static class Client
     {
+        public static Client<VoidState> Create() => Create(new VoidState());
+
         public static Client<T> Create<T>(T session) where T : class => new Client<T>(session);
     }
 
