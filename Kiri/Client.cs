@@ -2,21 +2,29 @@ namespace Kiri
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.IO;
     using System.Net.Sockets;
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class Client : IObservable<string>, ISender
+    public static class Client
+    {
+        public static Client<T> Create<T>(T session) where T : class => new Client<T>(session);
+    }
+
+    public class Client<T> : IObservable<string>, ISender where T : class
     {
         private readonly IList<IObserver<string>> observers =
             new List<IObserver<string>>();
 
-        private readonly IList<IMiddleware> pipeline = new List<IMiddleware>();
+        private readonly IList<IMiddleware<T>> pipeline = new List<IMiddleware<T>>();
 
         private readonly object syncRoot = new object();
 
         private readonly ISet<string> channels = new HashSet<string>();
+
+        private readonly T session;
 
         private TcpClient tcpClient;
 
@@ -26,19 +34,24 @@ namespace Kiri
 
         private string currentChannel;
 
-        public Client Use(IMiddleware middleware)
+        public Client(T session)
+        {
+            this.session = session;
+        }
+
+        public Client<T> Use(IMiddleware<T> middleware)
         {
             this.pipeline.Add(middleware);
             return this;
         }
 
-        public Client Use(Action<IContext, Action> middleware)
+        public Client<T> Use(Action<IContext<T>, Action> middleware)
         {
-            this.pipeline.Add(new MiddlewareAdapter(middleware));
+            this.pipeline.Add(new MiddlewareAdapter<T>(middleware));
             return this;
         }
 
-        public Client Connect(string hostname, int port)
+        public Client<T> Connect(string hostname, int port)
         {
             this.tcpClient = new TcpClient();
             this.tcpClient.Connect(hostname, port);
@@ -164,7 +177,7 @@ namespace Kiri
             }
         }
 
-        private void ExecutePipeline(IContext context)
+        private void ExecutePipeline(IContext<T> context)
         {
             bool cont;
             Action next = () => cont = true;
@@ -181,11 +194,11 @@ namespace Kiri
 
         private class Unsubscriber : IDisposable
         {
-            private readonly Client client;
+            private readonly Client<T> client;
 
             private IObserver<string> observer;
 
-            public Unsubscriber(Client client, IObserver<string> observer)
+            public Unsubscriber(Client<T> client, IObserver<string> observer)
             {
                 this.client = client;
                 this.observer = observer;
@@ -205,17 +218,17 @@ namespace Kiri
             }
         }
 
-        private class ContextAdapter : IContext
+        private class ContextAdapter : IContext<T>
         {
             private readonly string from;
 
             private readonly string message;
 
-            private readonly Client client;
+            private readonly Client<T> client;
 
             private readonly ISender sender;
 
-            public ContextAdapter(string from, string message, Client client)
+            public ContextAdapter(string from, string message, Client<T> client)
             {
                 this.from = from;
                 this.message = message;
@@ -223,11 +236,13 @@ namespace Kiri
                 this.client = client;
             }
 
+            public T Session => client.session;
+
             public string From => this.from;
 
             public string Message => this.message;
 
-            public Client Client => this.client;
+            public Client<T> Client => this.client;
 
             [Obsolete]
             public void Send(string data)

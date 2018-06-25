@@ -40,32 +40,43 @@ namespace Kiri
 
         public string Reply => this.reply;
 
-        private bool TryParse(out object reply)
+        private bool TryParse<T>(out T reply)
         {
-            reply = null;
-
+            reply = default(T);
+            object tmp = null;
             switch (this.Numeric)
             {
                 case RPL_NAMREPLY:
-                    return NamesReply.TryParse(this.reply, out reply);
-                case RPL_ENDOFNAMES:
-                    return EndOfNames.TryParse(this.reply, out reply);
-                case RPL_MOTDSTART:
-                    return MotdStart.TryParse(this.reply, out reply);
-                case RPL_MOTD:
-                    return Motd.TryParse(this.reply, out reply);
-                case RPL_ENDOFMOTD:
-                    return EndOfMotd.TryParse(this.reply, out reply);
-                default:
+                    NamesReply.TryParse(this.reply, out tmp);
                     break;
+                case RPL_ENDOFNAMES:
+                    EndOfNames.TryParse(this.reply, out tmp);
+                    break;
+                case RPL_MOTDSTART:
+                    MotdStart.TryParse(this.reply, out tmp);
+                    break;
+                case RPL_MOTD:
+                    Motd.TryParse(this.reply, out tmp);
+                    break;
+                case RPL_ENDOFMOTD:
+                    EndOfMotd.TryParse(this.reply, out tmp);
+                    break;
+                default:
+                    return false;
+            }
+
+            if (tmp is T)
+            {
+                reply = (T)tmp;
+                return true;
             }
 
             return false;
         }
 
-        public static bool TryParse(string s, out object reply)
+        public static bool TryParse<T>(string s, out T reply)
         {
-            reply = null;
+            reply = default(T);
 
             var maybeNumericReply = ReplyGrammar.NumericReply.TryParse(s);
             if (maybeNumericReply.WasSuccessful)
@@ -75,8 +86,7 @@ namespace Kiri
                     return true;
                 }
 
-                reply = maybeNumericReply.Value;
-                return true;
+                return false;
             }
 
             return false;
@@ -155,7 +165,7 @@ namespace Kiri
             reply = null;
 
             var res = ReplyGrammar.MotdStart.TryParse(s);
-            if(res.WasSuccessful)
+            if (res.WasSuccessful)
             {
                 reply = res.Value;
                 return true;
@@ -181,7 +191,7 @@ namespace Kiri
             reply = null;
 
             var res = ReplyGrammar.Motd.TryParse(s);
-            if(res.WasSuccessful)
+            if (res.WasSuccessful)
             {
                 reply = res.Value;
                 return true;
@@ -198,7 +208,7 @@ namespace Kiri
             reply = null;
 
             var res = ReplyGrammar.EndOfMotd.TryParse(s);
-            if(res.WasSuccessful)
+            if (res.WasSuccessful)
             {
                 reply = res.Value;
                 return true;

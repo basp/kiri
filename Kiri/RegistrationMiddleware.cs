@@ -2,26 +2,19 @@ namespace Kiri
 {
     using System;
 
-    public class RegistrationMiddleware : IMiddleware
+    public class RegistrationMiddleware<T> : IMiddleware<T> where T: class, IRegistrationProvider
     {
-        private readonly string nick;
-
-        private readonly string info;
-
         private bool registered;
 
-        public RegistrationMiddleware(string nick, string info)
+        public void Execute(IContext<T> context, Action next)
         {
-            this.nick = nick;
-            this.info = info;
-        }
+            var nick = context.Session.Nick;
+            var info = context.Session.Info;
 
-        public void Execute(IContext context, Action next)
-        {
             if (!this.registered)
             {
-                context.Send($"NICK {this.nick}");
-                context.Send($"USER {this.nick} 8 * :{this.info}");
+                context.Send($"NICK {nick}");
+                context.Send($"USER {nick} 8 * :{info}");
 
                 this.registered = true;
             }

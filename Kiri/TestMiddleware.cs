@@ -2,11 +2,11 @@ namespace Kiri
 {
     using System;
 
-    public class NumericReplyMiddleware : IMiddleware
+    public class TestMiddleware<T> : IMiddleware<T> where T: class
     {
-        public void Execute(IContext context, Action next)
+        public void Execute(IContext<T> context, Action next)
         {
-            if (NumericReply.TryParse(context.Message, out var reply))
+            if (NumericReply.TryParse<object>(context.Message, out var reply))
             {
                 switch (reply)
                 {

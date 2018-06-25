@@ -2,8 +2,8 @@ namespace Kiri
 {
     using System;
     
-    public interface IMiddleware
+    public interface IMiddleware<T> where T: class
     {
-        void Execute(IContext context, Action next);
+        void Execute(IContext<T> context, Action next);
     }
 }

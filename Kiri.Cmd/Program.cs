@@ -1,34 +1,53 @@
 namespace Kiri
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
     using Kiri;
 
     class Program
     {
+        class Session : IRegistrationProvider
+        {
+            private readonly string nick;
+            private readonly string url;
+            private readonly IDictionary<string, ISet<string>> channels;
+
+            public Session(string nick, string url)
+            {
+                this.nick = nick;
+                this.url = url;
+                this.channels = new Dictionary<string, ISet<string>>();
+            }
+
+            public string Nick => this.nick;
+
+            public string Info => this.url;
+
+            public IDictionary<string, ISet<string>> Channels => this.channels;
+        }
+
         public static void Main(string[] args)
         {
             const string Nick = "Methbot";
             const string Url = "https://github.com/basp/methbot";
+            const string Host = "chat.freenode.net";
+            const int Port = 6667;
 
             var facts = File.ReadAllLines(@"D:\basp\kiri\Kiri.Cmd\facts.txt");
 
-            var client = new Client()
-                .WithRegistration(Nick, Url)
+            var session = new Session(Nick, Url);
+
+            var client = Client
+                .Create(session)
+                .WithRegistration()
                 .WithPong()
                 .WithLogging(ctx => Console.WriteLine(ctx.Message))
-                .Use(new NumericReplyMiddleware())
-                .Connect("chat.freenode.net", 6667);
+                .Connect(Host, Port);
 
             Thread.Sleep(30 * 1000);
             client.Join("##vanityguild");
-
-            Thread.Sleep(5 * 1000);
-            client.Say("##vanityguild", "Hello!");
-
-            Thread.Sleep(5 * 1000);
-            client.Emote("##vanityguild", "waves");
 
             while (true)
             {

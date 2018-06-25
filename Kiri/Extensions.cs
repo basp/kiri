@@ -7,19 +7,16 @@ namespace Kiri
     {
         const string DefaultInfo = "https://github.com/basp/kiri";
 
-        public static Client WithRegistration(this Client client, string nick) =>
-            client.WithRegistration(nick, DefaultInfo);
+        public static Client<T> WithRegistration<T>(this Client<T> client)
+            where T : class, IRegistrationProvider => client.Use(new RegistrationMiddleware<T>());
 
-        public static Client WithRegistration(this Client client, string nick, string info) =>
-            client.Use(new RegistrationMiddleware(nick, info));
+        public static Client<T> WithPong<T>(this Client<T> client)
+            where T : class => client.Use(new PongMiddleware<T>());
 
-        public static Client WithPong(this Client client) =>
-            client.Use(new PongMiddleware());
+        public static Client<T> WithLogging<T>(this Client<T> client, Action<IContext<T>> log)
+            where T : class => client.Use(new LoggingMiddleware<T>(log));
 
-        public static Client WithLogging(this Client client, Action<IContext> log) =>
-            client.Use(new LoggingMiddleware(log));
-
-        public static Client WithGreeting(this Client client) =>
-            client.Use(new GreetingMiddleware());
+        public static Client<T> WithGreeting<T>(this Client<T> client)
+            where T : class => client.Use(new GreetingMiddleware<T>());
     }
 }

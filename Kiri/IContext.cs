@@ -1,8 +1,13 @@
 namespace Kiri
 {
-    public interface IContext : ISender
+    using System;
+    using System.Collections.Generic;
+
+    public interface IContext<T> : ISender where T: class
     {
-        Client Client { get; }
+        T Session { get; }
+
+        Client<T> Client { get; }
 
         string From { get; }
 

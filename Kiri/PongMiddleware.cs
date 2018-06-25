@@ -3,9 +3,9 @@ namespace Kiri
     using System;
     using System.Linq;
 
-    public class PongMiddleware : IMiddleware
+    public class PongMiddleware<T> : IMiddleware<T> where T: class
     {
-        public void Execute(IContext context, Action next)
+        public void Execute(IContext<T> context, Action next)
         {
             if (context.Message.StartsWith("PING"))
             {
