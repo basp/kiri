@@ -2,7 +2,7 @@ namespace Kiri
 {
     using Sprache;
 
-    public class Message
+    public class PrivateMessage
     {
         private readonly string from;
 
@@ -10,7 +10,7 @@ namespace Kiri
 
         private readonly string text;
 
-        public Message(string from, string channel, string text)
+        public PrivateMessage(string from, string channel, string text)
         {
             this.from = from;
             this.channel = channel;
@@ -23,7 +23,7 @@ namespace Kiri
 
         public string Text => this.text;
 
-        public static bool TryParse(string s, out Message message)
+        public static bool TryParse(string s, out PrivateMessage message)
         {
             message = null;
 

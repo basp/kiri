@@ -2,20 +2,15 @@ namespace Kiri
 {
     using System;
     using System.Linq;
+    using Sprache;
 
     public class PongMiddleware<T> : IMiddleware<T> where T: class
     {
         public void Execute(IContext<T> context, Action next)
         {
-            if (context.Message.StartsWith("PING"))
+            if(PingMessage.TryParse(context.Message, out var message))
             {
-                var chunks = context.Message
-                    .Split(':')
-                    .Select(x => x.Trim())
-                    .ToArray();
-
-                var ping = chunks[1];
-                context.Send($"PONG :{ping}");
+                context.Send($"PONG :{message.Ping}");
             }
 
             next();

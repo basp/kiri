@@ -5,14 +5,21 @@ namespace Kiri
 
     public static class Grammar
     {
-        public static Parser<Message> PrivateMessage =
+
+        public static Parser<PingMessage> PingMessage =
+            from _1 in Parse.String("PING").Token()
+            from _2 in Parse.Char(':').Token()
+            from ping in Parse.AnyChar.AtLeastOnce().Token().Text()
+            select new PingMessage(ping);
+
+        public static Parser<PrivateMessage> PrivateMessage =
             from _1 in Parse.Char(':').Token()
             from @from in Parse.AnyChar.Except(Parse.WhiteSpace).AtLeastOnce().Token().Text()
             from _2 in Parse.String("PRIVMSG").Token()
             from channel in Parse.AnyChar.Except(Parse.WhiteSpace).AtLeastOnce().Token().Text()
             from _3 in Parse.Char(':')
             from message in Parse.AnyChar.Many().Token().Text()
-            select new Message(@from, channel, message);
+            select new PrivateMessage(@from, channel, message);
 
         private static Parser<string> Prefix =
             from _ in Parse.Char(':')

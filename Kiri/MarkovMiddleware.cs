@@ -8,7 +8,7 @@ namespace Kiri
     {
         public void Execute(IContext<T> context, Action next)
         {
-            if (Message.TryParse(context.Message, out var message))
+            if (PrivateMessage.TryParse(context.Message, out var message))
             {
                 var mem = context.Session.Memory;
 
