@@ -4,17 +4,6 @@ namespace Kiri
     using System.Collections.Generic;
     using System.Linq;
 
-    public interface IClientBuilder<T> where T : class
-    {
-        IClientBuilder<T> Use(IMiddleware<T> middleware);
-
-        IClientBuilder<T> Use(Action<IContext<T>, Action> middleware);
-
-        IClientBuilder<T> Run(Action<IContext<T>> terminal);
-
-        Client<T> Build();
-    }
-
     public static class ClientBuilder
     {
         public static IClientBuilder<T> Create<T>(T session) where T : class => new ClientBuilder<T>(session);

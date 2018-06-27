@@ -34,6 +34,7 @@ namespace Kiri.Cmd
                 .Use(new GreetingMiddleware<Session>())
                 .Use(new PongMiddleware<Session>())
                 .Use(new LoggingMiddleware<Session>())
+                .Use(new CatMiddleware<Session>())
                 .Use(FactMiddleware.Create<Session>(Facts))
                 .Use(markov)
                 .Build()

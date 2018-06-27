@@ -5,19 +5,19 @@ namespace Kiri
 
     public static class Extensions
     {
-        // public static Client<T> WithIdentity<T>(this Client<T> client)
-        //     where T : class, IIdentityProvider => client.Use(new IdentityMiddleware<T>());
+        public static IClientBuilder<T> WithIdentity<T>(this IClientBuilder<T> builder)
+            where T : class, IIdentityProvider => builder.Use(new IdentityMiddleware<T>());
 
-        // public static Client<T> WithPong<T>(this Client<T> client)
-        //     where T : class => client.Use(new PongMiddleware<T>());
+        public static IClientBuilder<T> WithPong<T>(this IClientBuilder<T> builder)
+            where T : class => builder.Use(new PongMiddleware<T>());
 
-        // public static Client<T> WithLogging<T>(this Client<T> client)
-        //     where T : class => client.Use(new LoggingMiddleware<T>());
+        public static IClientBuilder<T> WithLogging<T>(this IClientBuilder<T> builder)
+            where T : class => builder.Use(new LoggingMiddleware<T>());
 
-        // public static Client<T> WithLogging<T>(this Client<T> client, Action<IContext<T>> log)
-        //     where T : class => client.Use(new LoggingMiddleware<T>(log));
+        public static IClientBuilder<T> WithLogging<T>(this IClientBuilder<T> builder, Action<IContext<T>> log)
+            where T : class => builder.Use(new LoggingMiddleware<T>(log));
 
-        // public static Client<T> WithGreeting<T>(this Client<T> client)
-        //     where T : class, IIdentityProvider => client.Use(new GreetingMiddleware<T>());
+        public static IClientBuilder<T> WithGreeting<T>(this IClientBuilder<T> builder)
+            where T : class, IIdentityProvider => builder.Use(new GreetingMiddleware<T>());
     }
 }
