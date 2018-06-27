@@ -8,8 +8,7 @@ namespace Kiri.Cmd
         {
             if (CatCommand.TryParse(context.Message, out CatCommand command))
             {
-                var cat = Cats.Next();
-                context.Client.Say(cat);
+                context.Client.Say("=^_^=");
             }
 
             next();
