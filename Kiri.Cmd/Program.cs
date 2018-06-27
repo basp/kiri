@@ -24,17 +24,19 @@ namespace Kiri.Cmd
             const int Port = 6667;
 
             var session = new Session(Nick, Url, Nick, "Meth");
+            
             var markov = new MarkovMiddleware<Session>();
             markov.Seed(session, @"D:\tmp\chat-sanitized.log");
 
-            var client = Client
-                .Create(session)
-                .WithIdentity()
-                .WithGreeting()
-                .WithPong()
-                .WithLogging()
+            var builder = ClientBuilder.Create(session);
+            var client = builder
+                .Use(new IdentityMiddleware<Session>())
+                .Use(new GreetingMiddleware<Session>())
+                .Use(new PongMiddleware<Session>())
+                .Use(new LoggingMiddleware<Session>())
                 .Use(FactMiddleware.Create<Session>(Facts))
                 .Use(markov)
+                .Build()
                 .Connect(Host, Port);
 
             Thread.Sleep(20 * 1000);

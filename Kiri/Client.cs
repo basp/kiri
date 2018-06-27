@@ -10,9 +10,9 @@ namespace Kiri
 
     public static class Client
     {
-        public static Client<VoidState> Create() => Create(new VoidState());
+        /// public static Client<VoidState> Create() => Create(new VoidState());
 
-        public static Client<T> Create<T>(T session) where T : class => new Client<T>(session);
+        // public static Client<T> Create<T>(T session) where T : class => new Client<T>(session);
     }
 
     public class Client<T> : IObservable<string>, ISender where T : class
@@ -20,11 +20,13 @@ namespace Kiri
         private readonly IList<IObserver<string>> observers =
             new List<IObserver<string>>();
 
-        private readonly IList<IMiddleware<T>> pipeline = new List<IMiddleware<T>>();
+        // private readonly IList<IMiddleware<T>> pipeline = new List<IMiddleware<T>>();
 
         private readonly object syncRoot = new object();
 
         private readonly ISet<string> channels = new HashSet<string>();
+
+        private readonly Action<IContext<T>> requestDelegate;
 
         private readonly T session;
 
@@ -36,22 +38,23 @@ namespace Kiri
 
         private string currentChannel;
 
-        public Client(T session)
+        public Client(T session, Action<IContext<T>> requestDelegate)
         {
+            this.requestDelegate = requestDelegate;
             this.session = session;
         }
 
-        public Client<T> Use(IMiddleware<T> middleware)
-        {
-            this.pipeline.Add(middleware);
-            return this;
-        }
+        // public Client<T> Use(IMiddleware<T> middleware)
+        // {
+        //     this.pipeline.Add(middleware);
+        //     return this;
+        // }
 
-        public Client<T> Use(Action<IContext<T>, Action> middleware)
-        {
-            this.pipeline.Add(new MiddlewareAdapter<T>(middleware));
-            return this;
-        }
+        // public Client<T> Use(Action<IContext<T>, Action> middleware)
+        // {
+        //     this.pipeline.Add(new MiddlewareAdapter<T>(middleware));
+        //     return this;
+        // }
 
         public Client<T> Connect(string hostname, int port)
         {
@@ -167,7 +170,9 @@ namespace Kiri
                             return;
                         }
 
-                        this.ExecutePipeline(new ContextAdapter(this.currentChannel, line, this));
+                        // this.ExecutePipeline(new ContextAdapter(this.currentChannel, line, this));
+                        var context = new ContextAdapter(this.currentChannel, line, this);
+                        this.requestDelegate(context);
                         this.OnNext(line);
                     }
                     catch (Exception ex)
@@ -179,20 +184,20 @@ namespace Kiri
             }
         }
 
-        private void ExecutePipeline(IContext<T> context)
-        {
-            bool cont;
-            Action next = () => cont = true;
-            for (var i = 0; i < this.pipeline.Count; i++)
-            {
-                cont = false;
-                this.pipeline[i].Execute(context, next);
-                if (!cont)
-                {
-                    break;
-                }
-            }
-        }
+        // private void ExecutePipeline(IContext<T> context)
+        // {
+        //     bool cont;
+        //     Action next = () => cont = true;
+        //     for (var i = 0; i < this.pipeline.Count; i++)
+        //     {
+        //         cont = false;
+        //         this.pipeline[i].Execute(context, next);
+        //         if (!cont)
+        //         {
+        //             break;
+        //         }
+        //     }
+        // }
 
         private class Unsubscriber : IDisposable
         {
