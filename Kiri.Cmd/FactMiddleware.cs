@@ -2,6 +2,7 @@ namespace Kiri.Cmd
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
 
     public static class FactMiddleware
     {
@@ -37,6 +38,11 @@ namespace Kiri.Cmd
             {
                 next();
             }
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
     }
 }

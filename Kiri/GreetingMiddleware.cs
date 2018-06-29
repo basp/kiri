@@ -2,6 +2,7 @@ namespace Kiri
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
 
     public class GreetingMiddleware<T> : IMiddleware<T> where T : class, IIdentityProvider
     {
@@ -47,6 +48,11 @@ namespace Kiri
             }
 
             next();
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -8,6 +8,8 @@ namespace Kiri
     using System.Threading;
     using System.Threading.Tasks;
 
+    public delegate Task RequestDelegate<T>(IContext<T> context) where T : class;
+
     public class Client<T> : IObservable<string>, ISender where T : class
     {
         private readonly IList<IObserver<string>> observers =
@@ -17,7 +19,7 @@ namespace Kiri
 
         private readonly ISet<string> channels = new HashSet<string>();
 
-        private readonly Action<IContext<T>> requestDelegate;
+        private readonly RequestDelegate<T> requestDelegate;
 
         private readonly T session;
 
@@ -29,7 +31,7 @@ namespace Kiri
 
         private string currentChannel;
 
-        public Client(T session, Action<IContext<T>> requestDelegate)
+        public Client(T session, RequestDelegate<T> requestDelegate)
         {
             this.requestDelegate = requestDelegate;
             this.session = session;
@@ -40,7 +42,10 @@ namespace Kiri
             this.tcpClient = new TcpClient();
             this.tcpClient.Connect(hostname, port);
             this.stream = this.tcpClient.GetStream();
-            this.writer = new StreamWriter(this.stream);
+            this.writer = new StreamWriter(this.stream)
+            {
+                AutoFlush = true,
+            };
 
             var thread = new Thread(this.StartReading);
             thread.Start();
@@ -51,11 +56,20 @@ namespace Kiri
         {
             if (this.stream == null)
             {
-                return;
+                throw new InvalidOperationException();
             }
 
             this.writer.WriteLine(data);
-            this.writer.Flush();
+        }
+
+        public Task SendAsync(string data)
+        {
+            if (this.stream == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return this.writer.WriteLineAsync(data);
         }
 
         public void Join(string channel)
@@ -71,31 +85,80 @@ namespace Kiri
             this.channels.Add(channel);
         }
 
+        public async Task JoinAsync(string channel)
+        {
+            this.currentChannel = channel;
+            if (this.channels.Contains(channel))
+            {
+                return;
+            }
+
+            await this
+                .SendAsync($"JOIN {channel}")
+                .ContinueWith(x =>
+                {
+                    if (x.Status == TaskStatus.RanToCompletion)
+                    {
+                        this.channels.Add(channel);
+                    }
+                });
+        }
 
         public void Part(string channel)
         {
             this.currentChannel = null;
-
             if (!this.channels.Contains(channel))
             {
                 return;
             }
 
             this.Send($"PART {channel}");
-            this.channels.Remove(channel);
+        }
+
+
+        public async Task PartAsync(string channel)
+        {
+            this.currentChannel = null;
+            if (!this.channels.Contains(channel))
+            {
+                return;
+            }
+
+            await this
+                .SendAsync($"PART {channel}")
+                .ContinueWith(x =>
+                {
+                    if (x.Status == TaskStatus.RanToCompletion)
+                    {
+                        this.channels.Remove(channel);
+                    }
+                });
         }
 
         public void Say(string message) =>
             this.Say(this.currentChannel, message);
 
+        public async Task SayAsync(string message) =>
+            await this.SayAsync(this.currentChannel, message);
+
+
         public void Say(string to, string message) =>
             this.Send($"PRIVMSG {to} :{message}");
+
+        public async Task SayAsync(string to, string message) =>
+            await this.SendAsync($"PRIVMSG {to} :{message}");
 
         public void Emote(string action) =>
             this.Emote(this.currentChannel, action);
 
+        public async Task EmoteAsync(string action) =>
+            await this.EmoteAsync(this.currentChannel, action);
+
         public void Emote(string to, string action) =>
             this.Send($"PRIVMSG {to} :\u0001ACTION {action}\u0001");
+
+        public async Task EmoteAsync(string to, string action) =>
+            await this.SendAsync($"PRIVMSG {to} :\u0001ACTION {action}\u0001");
 
         public IDisposable Subscribe(IObserver<string> observer)
         {

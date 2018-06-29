@@ -1,6 +1,7 @@
 namespace Kiri
 {
     using System;
+    using System.Threading.Tasks;
     using Serilog;
 
     public class LoggingMiddleware<T> : IMiddleware<T> where T : class
@@ -20,6 +21,11 @@ namespace Kiri
         {
             this.log(context);
             next();
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,6 +1,7 @@
 namespace Kiri
 {
     using System;
+    using System.Threading.Tasks;
 
     internal class MiddlewareAdapter<T> : IMiddleware<T> where T: class
     {
@@ -14,6 +15,11 @@ namespace Kiri
         public void Execute(IContext<T> context, Action next)
         {
             this.action(context, next);
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
     }
 }

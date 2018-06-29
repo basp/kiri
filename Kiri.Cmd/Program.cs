@@ -30,14 +30,14 @@ namespace Kiri.Cmd
 
             var builder = ClientBuilder.Create(session);
             var client = builder
-                .Use(new IdentityMiddleware<Session>())
-                .Use(new GreetingMiddleware<Session>())
-                .Use(new PongMiddleware<Session>())
-                .Use(new LoggingMiddleware<Session>())
-                .Use(new CatMiddleware<Session>())
-                .Use(FactMiddleware.Create<Session>(Facts))
-                .Use(markov)
-                .Build()
+                // .Use(new IdentityMiddleware<Session>())
+                // .Use(new GreetingMiddleware<Session>())
+                // .Use(new PongMiddleware<Session>())
+                // .Use(new LoggingMiddleware<Session>())
+                // .Use(new CatMiddleware<Session>())
+                // .Use(FactMiddleware.Create<Session>(Facts))
+                // .Use(markov)
+                // .Build()
                 .Connect(Host, Port);
 
             Thread.Sleep(20 * 1000);

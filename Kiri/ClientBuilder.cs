@@ -3,60 +3,52 @@ namespace Kiri
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
     public static class ClientBuilder
     {
-        public static IClientBuilder<T> Create<T>(T session) where T : class => new ClientBuilder<T>(session);
+        public static ClientBuilder<T> Create<T>(T session) where T: class =>
+            new ClientBuilder<T>(session);
     }
 
-    public class ClientBuilder<T> : IClientBuilder<T> where T : class
+    public class ClientBuilder<T> where T : class
     {
-        private static readonly Action<IContext<T>> DefaultTerminal = ctx => { };
+        private readonly IList<Func<IContext<T>, Func<Task>, Task>> middleware =
+            new List<Func<IContext<T>, Func<Task>, Task>>();
 
-        private readonly IList<IMiddleware<T>> middleware = new List<IMiddleware<T>>();
-
-        private readonly Stack<Action<IContext<T>>> terminals = new Stack<Action<IContext<T>>>();
+        private RequestDelegate<T> terminal = context => Task.CompletedTask;
 
         private readonly T session;
 
         public ClientBuilder(T session)
         {
             this.session = session;
-            this.terminals.Push(DefaultTerminal);
         }
 
-        public IClientBuilder<T> Use(IMiddleware<T> middleware)
+        public ClientBuilder<T> Use(Func<IContext<T>, Func<Task>, Task> middleware)
         {
             this.middleware.Add(middleware);
             return this;
         }
 
-        public IClientBuilder<T> Use(Action<IContext<T>, Action> middleware)
+        public ClientBuilder<T> Run(RequestDelegate<T> handler)
         {
-            this.middleware.Add(new MiddlewareAdapter<T>(middleware));
+            this.terminal = handler;
             return this;
         }
 
-        public IClientBuilder<T> Run(Action<IContext<T>> terminal)
+        public Client<T> Build()
         {
-            this.terminals.Push(terminal);
-            return this;
-        }
-
-        public Client<T> Build() => new Client<T>(session, BuildInternal());
-
-        private static Action<IContext<T>> Continue(IMiddleware<T> middleware, Action<IContext<T>> request) =>
-            context => middleware.Execute(context, () => request(context));
-
-        private Action<IContext<T>> BuildInternal()
-        {
-            var @delegate = this.terminals.Peek();
+            RequestDelegate<T> @delegate = this.terminal;
             foreach (var m in this.middleware.Reverse())
             {
                 @delegate = Continue(m, @delegate);
             }
 
-            return @delegate;
+            return new Client<T>(this.session, @delegate);
         }
+
+        private RequestDelegate<T> Continue(Func<IContext<T>, Func<Task>, Task> middleware, RequestDelegate<T> requestDelegate) =>
+            context => middleware(context, () => requestDelegate(context));
     }
 }

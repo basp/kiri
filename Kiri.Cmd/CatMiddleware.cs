@@ -1,6 +1,7 @@
 namespace Kiri.Cmd
 {
     using System;
+    using System.Threading.Tasks;
 
     public class CatMiddleware<T> : IMiddleware<T> where T : class
     {
@@ -21,6 +22,11 @@ namespace Kiri.Cmd
         {
             var i = rng.Next(cats.Length);
             return cats[i];
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
 
         private static readonly string[] cats = new[]

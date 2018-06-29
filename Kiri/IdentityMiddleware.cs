@@ -1,6 +1,7 @@
 namespace Kiri
 {
     using System;
+    using System.Threading.Tasks;
 
     public class IdentityMiddleware<T> : IMiddleware<T> where T: class, IIdentityProvider
     {
@@ -20,6 +21,11 @@ namespace Kiri
             }
 
             next();
+        }
+
+        public Task Execute(IContext<T> context, Task next)
+        {
+            throw new NotImplementedException();
         }
     }
 }
