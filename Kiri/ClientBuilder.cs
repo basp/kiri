@@ -11,10 +11,9 @@ namespace Kiri
             new ClientBuilder<T>(session);
     }
 
-    public class ClientBuilder<T> where T : class
+    public class ClientBuilder<T> : IClientBuilder<T> where T : class
     {
-        private readonly IList<Func<IContext<T>, Func<Task>, Task>> middleware =
-            new List<Func<IContext<T>, Func<Task>, Task>>();
+        private readonly IList<IMiddleware<T>> middleware = new List<IMiddleware<T>>();
 
         private RequestDelegate<T> terminal = context => Task.CompletedTask;
 
@@ -25,13 +24,18 @@ namespace Kiri
             this.session = session;
         }
 
-        public ClientBuilder<T> Use(Func<IContext<T>, Func<Task>, Task> middleware)
+        public IClientBuilder<T> Use(IMiddleware<T> middleware)
         {
-            this.middleware.Add(middleware);
+            throw new NotImplementedException();
+        }
+
+        public IClientBuilder<T> Use(Func<IContext<T>, Func<Task>, Task> middleware)
+        {
+            this.middleware.Add(new MiddlewareAdapter<T>(middleware));
             return this;
         }
 
-        public ClientBuilder<T> Run(RequestDelegate<T> handler)
+        public IClientBuilder<T> Run(RequestDelegate<T> handler)
         {
             this.terminal = handler;
             return this;
@@ -42,7 +46,7 @@ namespace Kiri
             RequestDelegate<T> @delegate = this.terminal;
             foreach (var m in this.middleware.Reverse())
             {
-                @delegate = Continue(m, @delegate);
+                @delegate = Continue(m.Execute, @delegate);
             }
 
             return new Client<T>(this.session, @delegate);

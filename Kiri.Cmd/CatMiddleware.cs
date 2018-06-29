@@ -24,7 +24,7 @@ namespace Kiri.Cmd
             return cats[i];
         }
 
-        public Task Execute(IContext<T> context, Task next)
+        public Task Execute(IContext<T> context, Func<Task> next)
         {
             throw new NotImplementedException();
         }

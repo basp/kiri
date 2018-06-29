@@ -4,6 +4,7 @@ namespace Kiri
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Serilog;
 
@@ -179,6 +180,11 @@ namespace Kiri
 
                 mem[tc].Add(tn.Item2);
             }
+        }
+
+        public Task Execute(IContext<T> context, Func<Task> next)
+        {
+            throw new NotImplementedException();
         }
     }
 }

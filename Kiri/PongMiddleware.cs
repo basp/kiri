@@ -2,19 +2,20 @@ namespace Kiri
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using Serilog;
     using Sprache;
 
     public class PongMiddleware<T> : IMiddleware<T> where T : class
     {
-        public void Execute(IContext<T> context, Action next)
+        public async Task Execute(IContext<T> context, Func<Task> next)
         {
             if (PingMessage.TryParse(context.Message, out var message))
             {
-                context.Send($"PONG :{message.Ping}");
+                await context.Client.SendAsync($"PONG :{message.Ping}");
             }
 
-            next();
+            await next();
         }
     }
 }

@@ -3,23 +3,16 @@ namespace Kiri
     using System;
     using System.Threading.Tasks;
 
-    internal class MiddlewareAdapter<T> : IMiddleware<T> where T: class
+    internal class MiddlewareAdapter<T> : IMiddleware<T> where T : class
     {
-        private Action<IContext<T>, Action> action;
+        private Func<IContext<T>, Func<Task>, Task> action;
 
-        public MiddlewareAdapter(Action<IContext<T>, Action> action)
+        public MiddlewareAdapter(Func<IContext<T>, Func<Task>, Task> action)
         {
             this.action = action;
         }
 
-        public void Execute(IContext<T> context, Action next)
-        {
-            this.action(context, next);
-        }
-
-        public Task Execute(IContext<T> context, Task next)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task Execute(IContext<T> context, Func<Task> next) =>
+            await this.action(context, next);
     }
 }

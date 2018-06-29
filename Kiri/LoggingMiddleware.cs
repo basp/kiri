@@ -17,15 +17,10 @@ namespace Kiri
             this.log = log;
         }
 
-        public void Execute(IContext<T> context, Action next)
+        public async Task Execute(IContext<T> context, Func<Task> next)
         {
             this.log(context);
-            next();
-        }
-
-        public Task Execute(IContext<T> context, Task next)
-        {
-            throw new NotImplementedException();
+            await next();
         }
     }
 }
