@@ -5,7 +5,6 @@ namespace Kiri.Cmd
 
     public class Session : IIdentityProvider
     {
-        private IDictionary<Tuple<string, string>, IList<string>> memory;
         private readonly string nick;
         private readonly string url;
         private readonly string[] aliases;
@@ -21,7 +20,6 @@ namespace Kiri.Cmd
             this.url = url;
             this.aliases = aliases;
             this.channels = new Dictionary<string, ISet<string>>();
-            this.memory = new Dictionary<Tuple<string, string>, IList<string>>();
         }
 
         public string Nick => this.nick;

@@ -10,7 +10,7 @@ namespace Kiri
 
     public delegate Task RequestDelegate<T>(IContext<T> context) where T : class;
 
-    public class Client<T> : IObservable<string> where T : class
+    public class Client<T> : IClient<T>, IObservable<string> where T : class
     {
         private readonly IList<IObserver<string>> observers =
             new List<IObserver<string>>();
@@ -31,7 +31,9 @@ namespace Kiri
 
         private string currentChannel;
 
-        public Client(T session, RequestDelegate<T> requestDelegate)
+        public Client(
+            T session,
+            RequestDelegate<T> requestDelegate)
         {
             this.requestDelegate = requestDelegate;
             this.session = session;
@@ -52,6 +54,7 @@ namespace Kiri
             return this;
         }
 
+        [Obsolete]
         public void Send(string data)
         {
             if (this.stream == null)
@@ -72,6 +75,7 @@ namespace Kiri
             return this.writer.WriteLineAsync(data);
         }
 
+        [Obsolete]
         public void Join(string channel)
         {
             this.currentChannel = channel;
@@ -104,6 +108,7 @@ namespace Kiri
                 });
         }
 
+        [Obsolete]
         public void Part(string channel)
         {
             this.currentChannel = null;
@@ -135,25 +140,29 @@ namespace Kiri
                 });
         }
 
+        [Obsolete]
         public void Say(string message) =>
-            this.Say(this.currentChannel, message);
+          this.Say(this.currentChannel, message);
 
         public async Task SayAsync(string message) =>
             await this.SayAsync(this.currentChannel, message);
 
-
+        [Obsolete]
         public void Say(string to, string message) =>
-            this.Send($"PRIVMSG {to} :{message}");
+        this.Send($"PRIVMSG {to} :{message}");
 
         public async Task SayAsync(string to, string message) =>
             await this.SendAsync($"PRIVMSG {to} :{message}");
 
+        [Obsolete]
         public void Emote(string action) =>
             this.Emote(this.currentChannel, action);
+
 
         public async Task EmoteAsync(string action) =>
             await this.EmoteAsync(this.currentChannel, action);
 
+        [Obsolete]
         public void Emote(string to, string action) =>
             this.Send($"PRIVMSG {to} :\u0001ACTION {action}\u0001");
 
@@ -213,8 +222,8 @@ namespace Kiri
                         }
 
                         var context = new ContextAdapter(this.currentChannel, line, this);
-                        this.requestDelegate(context);
                         this.OnNext(line);
+                        this.requestDelegate(context);
                     }
                     catch (Exception ex)
                     {
