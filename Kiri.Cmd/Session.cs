@@ -3,7 +3,7 @@ namespace Kiri.Cmd
     using System;
     using System.Collections.Generic;
 
-    public class Session : IIdentityProvider, IMarkovMemoryProvider
+    public class Session : IIdentityProvider
     {
         private IDictionary<Tuple<string, string>, IList<string>> memory;
         private readonly string nick;
@@ -31,7 +31,5 @@ namespace Kiri.Cmd
         public string[] Aliases => this.aliases;
 
         public IDictionary<string, ISet<string>> Channels => this.channels;
-
-        public IDictionary<Tuple<string, string>, IList<string>> Memory => this.memory;
     }
 }

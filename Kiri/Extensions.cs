@@ -16,8 +16,5 @@ namespace Kiri
 
         public static IClientBuilder<T> UseLogging<T>(this IClientBuilder<T> builder, Action<IContext<T>> log)
             where T : class => builder.Use(new LoggingMiddleware<T>(log));
-
-        public static IClientBuilder<T> UseGreeting<T>(this IClientBuilder<T> builder)
-            where T : class, IIdentityProvider => builder.Use(new GreetingMiddleware<T>());
     }
 }

@@ -3,7 +3,7 @@ namespace Kiri
     using System.Linq;
     using Sprache;
 
-    public static class Grammar
+    internal static class Grammar
     {
 
         public static Parser<PingMessage> PingMessage =

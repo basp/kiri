@@ -26,7 +26,8 @@ namespace Kiri
 
         public IClientBuilder<T> Use(IMiddleware<T> middleware)
         {
-            throw new NotImplementedException();
+            this.middleware.Add(middleware);
+            return this;
         }
 
         public IClientBuilder<T> Use(Func<IContext<T>, Func<Task>, Task> middleware)

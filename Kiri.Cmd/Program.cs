@@ -25,9 +25,6 @@ namespace Kiri.Cmd
 
             var session = new Session(Nick, Url, Nick, "Meth");
 
-            var markov = new MarkovMiddleware<Session>();
-            markov.Seed(session, @"D:\tmp\chat-sanitized.log");
-
             var builder = ClientBuilder.Create(session);
             var client = builder
                 // .Use(new IdentityMiddleware<Session>())

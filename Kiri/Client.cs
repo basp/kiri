@@ -10,7 +10,7 @@ namespace Kiri
 
     public delegate Task RequestDelegate<T>(IContext<T> context) where T : class;
 
-    public class Client<T> : IObservable<string>, ISender where T : class
+    public class Client<T> : IObservable<string> where T : class
     {
         private readonly IList<IObserver<string>> observers =
             new List<IObserver<string>>();
@@ -259,13 +259,10 @@ namespace Kiri
 
             private readonly Client<T> client;
 
-            private readonly ISender sender;
-
             public ContextAdapter(string from, string message, Client<T> client)
             {
                 this.from = from;
                 this.message = message;
-                this.sender = client;
                 this.client = client;
             }
 
@@ -276,12 +273,6 @@ namespace Kiri
             public string Message => this.message;
 
             public Client<T> Client => this.client;
-
-            [Obsolete]
-            public void Send(string data)
-            {
-                this.sender.Send(data);
-            }
         }
     }
 }
